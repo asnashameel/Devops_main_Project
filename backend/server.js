@@ -15,6 +15,9 @@ const pool = new Pool({
   database: process.env.DB_NAME || 'cloudops_demo',
   password: process.env.DB_PASSWORD || 'password',
   port: process.env.DB_PORT || 5432,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 // Middleware
