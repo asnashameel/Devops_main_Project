@@ -37,7 +37,8 @@ phases:
       - echo Building the frontend Docker image...
       - cd frontend
       - docker build -t $REPOSITORY_URI_FRONTEND .
-      - cd ../backend
+      - cd ..
+      - cd backend
       - echo Building the backend Docker image...
       - docker build -t $REPOSITORY_URI_BACKEND .
       - cd ..
