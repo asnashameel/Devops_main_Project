@@ -7,7 +7,7 @@ metadata:
     app: cloudops-demo
 data:
   # Database configuration (AWS RDS)
-  DB_HOST: "cloudops-demo-postgres.cluster-xxxxx.us-west-2.rds.amazonaws.com"  # Replace with your RDS endpoint
+  DB_HOST: "cloudops-demo-postgres.cne4ekkyyoz0.us-east-1.rds.amazonaws.com"  # Replace with your RDS endpoint
   DB_PORT: "5432"
   DB_NAME: "cloudops_demo"
   DB_USER: "postgres"

@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: your-registry/cloudops-backend:latest  # Replace with your image
+        image: 207567798584.dkr.ecr.us-east-1.amazonaws.com/dev-backend:latest  # Replace with your image
         ports:
         - containerPort: 5000
         env:

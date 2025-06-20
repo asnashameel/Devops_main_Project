@@ -76,7 +76,7 @@ Resources:
       DBInstanceIdentifier: !Ref DBInstanceIdentifier
       DBInstanceClass: db.t3.micro  # Change to db.t3.small or larger for production
       Engine: postgres
-      EngineVersion: '15.4'
+      EngineVersion: '15.13'
       AllocatedStorage: 20
       StorageType: gp2
       StorageEncrypted: true

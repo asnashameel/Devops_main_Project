@@ -11,7 +11,7 @@ RUN adduser -S nodejs -u 1001
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+RUN npm install
 
 # Copy source code
 COPY . .
