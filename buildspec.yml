@@ -9,13 +9,9 @@ env:
     IMAGE_TAG: latest
     EKS_CLUSTER_NAME: kube-cluster
     EKS_KUBECTL_ROLE_ARN: "arn:aws:iam::207567798584:role/eksctl-kube-cluster-cluster-ServiceRole-quAvHhmVUyWq"
-  parameter-store:
-    DB_PASSWORD: /cloudops-demo/db-password
 
 phases:
   install:
-    runtime-versions:
-      nodejs: 18
     commands:
       - echo Logging in to Amazon ECR...
       - aws --version
