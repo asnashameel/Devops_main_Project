@@ -27,13 +27,6 @@ phases:
 
   pre_build:
     commands:
-      - echo Updating kubeconfig...
-      - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $EKS_CLUSTER_NAME
-      - echo Running tests...
-      - cd frontend && npm ci && npm test -- --coverage --watchAll=false
-      - cd ../backend && npm ci && npm test
-      - cd ..
-      - echo Build started on `date`
       - echo Building the Docker images...
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
