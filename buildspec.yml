@@ -4,15 +4,14 @@ env:
   variables:
     AWS_DEFAULT_REGION: us-east-1
     AWS_ACCOUNT_ID: "207567798584"
-    IMAGE_REPO_NAME_FRONTEND: 207567798584.dkr.ecr.us-east-1.amazonaws.com/dev-frontend:latest
-    IMAGE_REPO_NAME_BACKEND: 207567798584.dkr.ecr.us-east-1.amazonaws.com/dev-backend:latest
+    REGION: us-east-1
     FRONTEND_REPO: dev-frontend
     BACKEND_REPO: dev-backend
     FRONTEND_DIR: frontend
     BACKEND_DIR: backend
     K8S_MANIFEST_DIR: k8s
     IMAGE_TAG: latest
-    EKS_CLUSTER_NAME: kube-cluster
+    CLUSTER_NAME: kube-cluster
     EKS_KUBECTL_ROLE_ARN: "arn:aws:iam::207567798584:role/eksctl-kube-cluster-cluster-ServiceRole-quAvHhmVUyWq"
 
 phases:
@@ -32,32 +31,39 @@ phases:
 
   pre_build:
     commands:
+      - aws sts get-caller-identity
+      - echo Setting dynamic image tag...
+      - export IMAGE_TAG=v1.${CODEBUILD_BUILD_NUMBER}
+
       - echo Building the Docker images...
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
 
+      - echo Updating kubeconfig for EKS cluster...
+      - aws eks update-kubeconfig --region $REGION --name $CLUSTER_NAME
   build:
     commands:
-      - echo Build started on `date`
-      - echo Building the frontend Docker image...
-      - cd frontend
-      - docker build -t $IMAGE_REPO_NAME_FRONTEND .
-      - cd ..
-      - cd backend
-      - echo Building the backend Docker image...
-      - docker build -t $IMAGE_REPO_NAME_BACKEND .
-      - cd ..
+      - echo Building frontend Docker image...
+      - docker build -t ${FRONTEND_REPO}:${IMAGE_TAG} ${FRONTEND_DIR}
+      - docker tag ${FRONTEND_REPO}:${IMAGE_TAG} ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${FRONTEND_REPO}:${IMAGE_TAG}
 
+      - echo Building backend Docker image...
+      - docker build -t ${BACKEND_REPO}:${IMAGE_TAG} ${BACKEND_DIR}
+      - docker tag ${BACKEND_REPO}:${IMAGE_TAG} ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${BACKEND_REPO}:${IMAGE_TAG}
   post_build:
     commands:
-      - echo Build completed on `date`
-      - echo Pushing the Docker images...
-      - docker push $REPOSITORY_URI_FRONTEND
-      - docker push $REPOSITORY_URI_BACKEND
+      - echo Pushing frontend image to ECR...
+      - docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${FRONTEND_REPO}:${IMAGE_TAG}
+
+      - echo Pushing backend image to ECR...
+      - docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${BACKEND_REPO}:${IMAGE_TAG}
+
       - echo Updating Kubernetes manifests...
       - mkdir -p k8s-out
+
       - sed "s|IMAGE_PLACEHOLDER|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${FRONTEND_REPO}:${IMAGE_TAG}|g" $K8S_MANIFEST_DIR/frontend-deployment.yaml > k8s-out/frontend-deployment.yaml
       - sed "s|IMAGE_PLACEHOLDER|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${BACKEND_REPO}:${IMAGE_TAG}|g" $K8S_MANIFEST_DIR/backend-deployment.yaml > k8s-out/backend-deployment.yaml
+
       - cp $K8S_MANIFEST_DIR/*.yaml k8s-out/
       - echo "Final list of generated Kubernetes YAML files:"
       - find k8s-out/
