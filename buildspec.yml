@@ -28,7 +28,7 @@ phases:
   pre_build:
     commands:
       - echo Updating kubeconfig...
-      - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $EKS_CLUSTER_NAME --role-arn $EKS_KUBECTL_ROLE_ARN
+      - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $EKS_CLUSTER_NAME
       - echo Running tests...
       - cd frontend && npm ci && npm test -- --coverage --watchAll=false
       - cd ../backend && npm ci && npm test
