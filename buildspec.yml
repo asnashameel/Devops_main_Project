@@ -36,11 +36,11 @@ phases:
       - echo Build started on `date`
       - echo Building the frontend Docker image...
       - cd frontend
-      - docker build -t $REPOSITORY_URI_FRONTEND .
+      - docker build -t $IMAGE_REPO_NAME_FRONTEND .
       - cd ..
       - cd backend
       - echo Building the backend Docker image...
-      - docker build -t $REPOSITORY_URI_BACKEND .
+      - docker build -t $IMAGE_REPO_NAME_BACKEND .
       - cd ..
 
   post_build:
