@@ -13,8 +13,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-CLUSTER_NAME=${CLUSTER_NAME:-"cloudops-demo"}
-REGION=${AWS_REGION:-"us-west-2"}
+CLUSTER_NAME=${CLUSTER_NAME:-"kube-cluster"}
+REGION=${AWS_REGION:-"us-east-1"}
 STACK_NAME="cloudops-demo-rds"
 DB_PASSWORD=${DB_PASSWORD:-""}
 
@@ -112,7 +112,7 @@ create_rds() {
     # Deploy CloudFormation stack
     aws cloudformation $OPERATION \
         --stack-name $STACK_NAME \
-        --template-body file://infrastructure/rds-setup.yaml \
+        --template-body file://../infrastructure/rds-setup.yaml \
         --region $REGION \
         --parameters \
             ParameterKey=VPCId,ParameterValue=$VPC_ID \
@@ -122,7 +122,7 @@ create_rds() {
         --capabilities CAPABILITY_IAM
     
     echo -e "${YELLOW}⏳ Waiting for stack deployment to complete...${NC}"
-    aws cloudformation wait stack-$OPERATION-complete --stack-name $STACK_NAME --region $REGION
+    aws cloudformation wait stack-${OPERATION%-stack}-complete --stack-name $STACK_NAME --region $REGION
     
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}✅ RDS stack deployed successfully${NC}"
@@ -145,7 +145,7 @@ update_configmap() {
     fi
     
     # Update the ConfigMap file
-    sed -i.bak "s/DB_HOST: \".*\"/DB_HOST: \"$DB_ENDPOINT\"/" k8s/01-configmap.yaml
+    sed -i.bak "s/DB_HOST: \".*\"/DB_HOST: \"$DB_ENDPOINT\"/" ../k8s/01-configmap.yaml
     rm -f k8s/01-configmap.yaml.bak
     
     echo -e "${GREEN}✅ ConfigMap updated with RDS endpoint: $DB_ENDPOINT${NC}"
