@@ -2,13 +2,13 @@ version: 0.2
 
 env:
   variables:
-    AWS_DEFAULT_REGION: us-west-2
-    AWS_ACCOUNT_ID: "123456789012"  # Replace with your AWS Account ID
-    IMAGE_REPO_NAME_FRONTEND: cloudops-frontend
-    IMAGE_REPO_NAME_BACKEND: cloudops-backend
+    AWS_DEFAULT_REGION: us-east-1
+    AWS_ACCOUNT_ID: "207567798584"
+    IMAGE_REPO_NAME_FRONTEND: 207567798584.dkr.ecr.us-east-1.amazonaws.com/dev-frontend:latest
+    IMAGE_REPO_NAME_BACKEND: 207567798584.dkr.ecr.us-east-1.amazonaws.com/dev-backend:latest
     IMAGE_TAG: latest
-    EKS_CLUSTER_NAME: cloudops-demo
-    EKS_KUBECTL_ROLE_ARN: "arn:aws:iam::123456789012:role/CodeBuildKubectlRole"  # Replace with your role ARN
+    EKS_CLUSTER_NAME: kube-cluster
+    EKS_KUBECTL_ROLE_ARN: "arn:aws:iam::207567798584:role/eksctl-kube-cluster-cluster-ServiceRole-quAvHhmVUyWq"
   parameter-store:
     DB_PASSWORD: /cloudops-demo/db-password
 
@@ -16,13 +16,10 @@ phases:
   install:
     runtime-versions:
       nodejs: 18
-      docker: 20
     commands:
       - echo Logging in to Amazon ECR...
       - aws --version
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-      - REPOSITORY_URI_FRONTEND=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME_FRONTEND
-      - REPOSITORY_URI_BACKEND=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME_BACKEND
       - echo Installing kubectl...
       - curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/kubectl
       - chmod +x ./kubectl
@@ -50,43 +47,32 @@ phases:
       - echo Build started on `date`
       - echo Building the frontend Docker image...
       - cd frontend
-      - docker build -t $REPOSITORY_URI_FRONTEND:latest .
-      - docker tag $REPOSITORY_URI_FRONTEND:latest $REPOSITORY_URI_FRONTEND:$IMAGE_TAG
+      - docker build -t $REPOSITORY_URI_FRONTEND .
       - cd ../backend
       - echo Building the backend Docker image...
-      - docker build -t $REPOSITORY_URI_BACKEND:latest .
-      - docker tag $REPOSITORY_URI_BACKEND:latest $REPOSITORY_URI_BACKEND:$IMAGE_TAG
+      - docker build -t $REPOSITORY_URI_BACKEND .
       - cd ..
 
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker images...
-      - docker push $REPOSITORY_URI_FRONTEND:latest
-      - docker push $REPOSITORY_URI_FRONTEND:$IMAGE_TAG
-      - docker push $REPOSITORY_URI_BACKEND:latest
-      - docker push $REPOSITORY_URI_BACKEND:$IMAGE_TAG
+      - docker push $REPOSITORY_URI_FRONTEND
+      - docker push $REPOSITORY_URI_BACKEND
       - echo Updating Kubernetes manifests...
-      - sed -i.bak "s|your-registry/cloudops-frontend:latest|$REPOSITORY_URI_FRONTEND:$IMAGE_TAG|g" k8s/09-frontend-deployment.yaml
-      - sed -i.bak "s|your-registry/cloudops-backend:latest|$REPOSITORY_URI_BACKEND:$IMAGE_TAG|g" k8s/07-backend-deployment.yaml
-      - echo Deploying to EKS...
-      - kubectl apply -f k8s/
-      - echo Waiting for deployment to complete...
-      - kubectl rollout status deployment/frontend-deployment -n cloudops-demo --timeout=300s
-      - kubectl rollout status deployment/backend-deployment -n cloudops-demo --timeout=300s
-      - echo Getting service information...
-      - kubectl get services -n cloudops-demo
-      - echo Deployment completed successfully!
-
+      - mkdir -p k8s-out
+      - sed -i.bak "s|207567798584.dkr.ecr.us-east-1.amazonaws.com/dev-frontend:latest|$REPOSITORY_URI_FRONTEND:$IMAGE_TAG|g" $k8s/08-frontend-deployment.yaml > k8s-out/frontend-deployment.yaml
+      - sed -i.bak "s|207567798584.dkr.ecr.us-east-1.amazonaws.com/dev-backend:latest|$REPOSITORY_URI_BACKEND:$IMAGE_TAG|g" $k8s/07-backend-deployment.yaml > k8s-out/backend-deployment.yaml
+      - cp $k8s/*.yaml k8s-out/
+      - echo "Final list of generated Kubernetes YAML files:"
+      - find k8s-out/
 artifacts:
+  base-directory: k8s-out
+  discard-paths: yes
   files:
-    - k8s/*
-    - scripts/*
     - '**/*'
-  name: cloudops-demo-artifacts
 
 cache:
   paths:
-    - '/root/.npm/**/*'
     - 'frontend/node_modules/**/*'
     - 'backend/node_modules/**/*'
