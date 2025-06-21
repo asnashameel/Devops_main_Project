@@ -58,8 +58,8 @@ phases:
       - echo Updating Kubernetes manifests...
       - mkdir -p k8s-out
 
-      - sed "s|IMAGE_PLACEHOLDER|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${FRONTEND_REPO}:${IMAGE_TAG}|g" $K8S_MANIFEST_DIR/frontend-deployment.yaml > k8s-out/frontend-deployment.yaml
-      - sed "s|IMAGE_PLACEHOLDER|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${BACKEND_REPO}:${IMAGE_TAG}|g" $K8S_MANIFEST_DIR/backend-deployment.yaml > k8s-out/backend-deployment.yaml
+      - sed "s|IMAGE_PLACEHOLDER|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${FRONTEND_REPO}:${IMAGE_TAG}|g" $K8S_MANIFEST_DIR/09-frontend-deployment.yaml > k8s-out/09-frontend-deployment.yaml
+      - sed "s|IMAGE_PLACEHOLDER|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${BACKEND_REPO}:${IMAGE_TAG}|g" $K8S_MANIFEST_DIR/07-backend-deployment.yaml > k8s-out/07-backend-deployment.yaml
 
       - cp $K8S_MANIFEST_DIR/*.yaml k8s-out/
       - echo "Final list of generated Kubernetes YAML files:"
