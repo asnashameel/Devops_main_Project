@@ -31,7 +31,7 @@ Parameters:
 
   NodeGroupMaxSize:
     Type: Number
-    Default: 10
+    Default: 5
     Description: Maximum number of nodes in the node group
 
   NodeGroupDesiredSize:
