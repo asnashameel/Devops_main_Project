@@ -11,6 +11,7 @@ env:
     BACKEND_DIR: backend
     K8S_MANIFEST_DIR: k8s
     CLUSTER_NAME: kube-cluster
+    IMAGE_TAG: latest
     EKS_KUBECTL_ROLE_ARN: "arn:aws:iam::207567798584:role/eksctl-kube-cluster-cluster-ServiceRole-quAvHhmVUyWq"
 
 phases:
@@ -32,7 +33,7 @@ phases:
     commands:
       - aws sts get-caller-identity
       - echo Setting dynamic image tag...
-      - export IMAGE_TAG=v1.${CODEBUILD_BUILD_NUMBER}
+      #- export IMAGE_TAG=v1.${CODEBUILD_BUILD_NUMBER}
 
       - echo Building the Docker images...
       - echo Updating kubeconfig for EKS cluster...
