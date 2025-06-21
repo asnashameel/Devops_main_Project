@@ -50,7 +50,7 @@ Resources:
               Federated: !Sub 'arn:aws:iam::${AWS::AccountId}:oidc-provider/${EKSClusterOIDCIssuer}'
             Action: sts:AssumeRoleWithWebIdentity
             Condition:
-              StringEquals
+              StringEquals:
                 !Sub "${EKSClusterOIDCIssuer}:sub": 'system:serviceaccount:kube-system:aws-load-balancer-controller'
                 !Sub "${EKSClusterOIDCIssuer}:aud": 'sts.amazonaws.com'
       Policies:
