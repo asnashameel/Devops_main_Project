@@ -31,8 +31,8 @@ Resources:
             Action: sts:AssumeRoleWithWebIdentity
             Condition:
               StringEquals:
-                !Sub "${EKSClusterOIDCIssuer}:sub": 'system:serviceaccount:kube-system:ebs-csi-controller-sa'
-                !Sub "${EKSClusterOIDCIssuer}:aud": 'sts.amazonaws.com'
+                !Sub "${EKSClusterOIDCIssuer}:sub": "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+                !Sub "${EKSClusterOIDCIssuer}:aud": "sts.amazonaws.com"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
       Tags:
