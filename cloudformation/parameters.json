@@ -1,0 +1,42 @@
+[
+  {
+    "ParameterKey": "ProjectName",
+    "ParameterValue": "cloudops-demo"
+  },
+  {
+    "ParameterKey": "Environment",
+    "ParameterValue": "demo"
+  },
+  {
+    "ParameterKey": "KubernetesVersion",
+    "ParameterValue": "1.27"
+  },
+  {
+    "ParameterKey": "NodeGroupInstanceType",
+    "ParameterValue": "t3.medium"
+  },
+  {
+    "ParameterKey": "NodeGroupMinSize",
+    "ParameterValue": "1"
+  },
+  {
+    "ParameterKey": "NodeGroupMaxSize",
+    "ParameterValue": "10"
+  },
+  {
+    "ParameterKey": "NodeGroupDesiredSize",
+    "ParameterValue": "3"
+  },
+  {
+    "ParameterKey": "DBName",
+    "ParameterValue": "cloudops_demo"
+  },
+  {
+    "ParameterKey": "DBUsername",
+    "ParameterValue": "postgres"
+  },
+  {
+    "ParameterKey": "DBPassword",
+    "ParameterValue": "asnashameel12"
+  }
+] 
