@@ -36,9 +36,6 @@ phases:
       - export IMAGE_TAG=v1.${CODEBUILD_BUILD_NUMBER}
 
       - echo Building the Docker images...
-      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      - IMAGE_TAG=${COMMIT_HASH:=latest}
-
       - echo Updating kubeconfig for EKS cluster...
       - aws eks update-kubeconfig --region $REGION --name $CLUSTER_NAME
   build:
