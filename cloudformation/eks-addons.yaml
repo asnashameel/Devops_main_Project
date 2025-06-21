@@ -17,9 +17,7 @@ Parameters:
   EKSClusterOIDCIssuer:
     Type: String
     Description: EKS cluster OIDC issuer URL (without https://)
-
 Resources:
-  # EBS CSI Driver IAM Role
   EBSCSIDriverRole:
     Type: AWS::IAM::Role
     Properties:
@@ -33,7 +31,6 @@ Resources:
             Action: sts:AssumeRoleWithWebIdentity
             Condition:
               StringEquals:
-                # REVERTED TO ORIGINAL CORRECT SYNTAX
                 !Sub "${EKSClusterOIDCIssuer}:sub": 'system:serviceaccount:kube-system:ebs-csi-controller-sa'
                 !Sub "${EKSClusterOIDCIssuer}:aud": 'sts.amazonaws.com'
       ManagedPolicyArns:
@@ -41,8 +38,6 @@ Resources:
       Tags:
         - Key: Project
           Value: !Ref ProjectName
-
-  # AWS Load Balancer Controller IAM Role
   AWSLoadBalancerControllerRole:
     Type: AWS::IAM::Role
     Properties:
@@ -55,8 +50,7 @@ Resources:
               Federated: !Sub 'arn:aws:iam::${AWS::AccountId}:oidc-provider/${EKSClusterOIDCIssuer}'
             Action: sts:AssumeRoleWithWebIdentity
             Condition:
-              StringEquals:
-                # REVERTED TO ORIGINAL CORRECT SYNTAX
+              StringEquals
                 !Sub "${EKSClusterOIDCIssuer}:sub": 'system:serviceaccount:kube-system:aws-load-balancer-controller'
                 !Sub "${EKSClusterOIDCIssuer}:aud": 'sts.amazonaws.com'
       Policies:
@@ -194,8 +188,6 @@ Resources:
       Tags:
         - Key: Project
           Value: !Ref ProjectName
-
-  # EKS Addon - EBS CSI Driver
   EBSCSIDriverAddon:
     Type: AWS::EKS::Addon
     Properties:
