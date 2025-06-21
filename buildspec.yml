@@ -10,7 +10,6 @@ env:
     FRONTEND_DIR: frontend
     BACKEND_DIR: backend
     K8S_MANIFEST_DIR: k8s
-    IMAGE_TAG: latest
     CLUSTER_NAME: kube-cluster
     EKS_KUBECTL_ROLE_ARN: "arn:aws:iam::207567798584:role/eksctl-kube-cluster-cluster-ServiceRole-quAvHhmVUyWq"
 
