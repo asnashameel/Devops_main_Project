@@ -1,0 +1,58 @@
+Complete CloudFormation Setup:
+Files Created:
+main-template.yaml - Complete infrastructure template (5,500+ lines)
+eks-addons.yaml - EKS addons and service roles
+parameters.json - Parameter values for deployment
+deploy.sh - Automated deployment script with progress tracking
+cleanup.sh - Complete cleanup script
+README.md - Comprehensive documentation
+🏗️ Infrastructure Components (Same as Terraform):
+Networking:
+VPC with 10.0.0.0/16 CIDR
+3 Public subnets (for load balancers)
+3 Private subnets (for EKS nodes)
+3 Intra subnets (for RDS)
+NAT Gateway, Internet Gateway, Route Tables
+EKS Infrastructure:
+EKS Cluster v1.27 with OIDC provider
+Managed Node Group (t3.medium instances)
+EBS CSI Driver addon
+AWS Load Balancer Controller
+Database:
+RDS PostgreSQL 15.4 instance
+Enhanced monitoring & Performance Insights
+Automated backups, security groups
+Container Registry:
+ECR repositories for frontend/backend
+Lifecycle policies for image cleanup
+Vulnerability scanning enabled
+IAM & Security:
+EKS cluster service roles
+Node group roles
+CodeBuild role for CI/CD
+EBS CSI driver IRSA role
+Load Balancer Controller IRSA role
+🚀 Quick Start:
+Navigate to cloudformation directory
+Update parameters.json - Change the database password!
+Run deployment: ./deploy.sh
+The script handles everything automatically:
+✅ Template validation
+✅ Stack deployment
+✅ kubectl configuration
+✅ AWS Load Balancer Controller installation
+🆚 Key Differences: Terraform vs CloudFormation
+Aspect	Terraform	CloudFormation
+State	External state file	AWS managed
+Syntax	HCL (cleaner)	YAML (verbose)
+Modularity	Better modules	Nested stacks
+Multi-cloud	✅ Yes	❌ AWS only
+Drift Detection	Manual	Built-in
+💡 Advantages of CloudFormation:
+No State Management: AWS handles all state
+Native Integration: Deep AWS service integration
+Change Sets: Preview changes before applying
+Rollback: Automatic rollback on failures
+Service Catalog: Integration with AWS Service Catalog
+Both implementations provide identical infrastructure - choose based on your team's preference and requirements!
+Would you like me to explain any specific part of the CloudFormation templates or help with the deployment process?

@@ -1,0 +1,18 @@
+# AWS Configuration
+aws_region = "us-west-2"
+environment = "demo"
+
+# EKS Cluster Configuration
+cluster_name = "cloudops-demo"
+kubernetes_version = "1.27"
+
+# Node Group Configuration
+node_group_instance_types = ["t3.medium"]
+node_group_min_size = 1
+node_group_max_size = 10
+node_group_desired_size = 3
+
+# RDS Configuration
+db_name = "cloudops_demo"
+db_username = "postgres"
+db_password = "your-secure-password-here"  # Change this to a secure password 

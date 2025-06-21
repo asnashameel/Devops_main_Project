@@ -1,0 +1,220 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'EKS Addons: EBS CSI Driver and AWS Load Balancer Controller'
+
+Parameters:
+  ProjectName:
+    Type: String
+    Description: Name of the project used for resource naming
+
+  EKSClusterName:
+    Type: String
+    Description: Name of the EKS cluster
+
+  VPCId:
+    Type: String
+    Description: VPC ID where the cluster is deployed
+
+  EKSClusterOIDCIssuer:
+    Type: String
+    Description: EKS cluster OIDC issuer URL (without https://)
+
+Resources:
+  # EBS CSI Driver IAM Role
+  EBSCSIDriverRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-ebs-csi-driver'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Sub 'arn:aws:iam::${AWS::AccountId}:oidc-provider/${EKSClusterOIDCIssuer}'
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                !Sub '${EKSClusterOIDCIssuer}:sub': 'system:serviceaccount:kube-system:ebs-csi-controller-sa'
+                !Sub '${EKSClusterOIDCIssuer}:aud': 'sts.amazonaws.com'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+
+  # AWS Load Balancer Controller IAM Role
+  AWSLoadBalancerControllerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-aws-load-balancer-controller'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Sub 'arn:aws:iam::${AWS::AccountId}:oidc-provider/${EKSClusterOIDCIssuer}'
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                !Sub '${EKSClusterOIDCIssuer}:sub': 'system:serviceaccount:kube-system:aws-load-balancer-controller'
+                !Sub '${EKSClusterOIDCIssuer}:aud': 'sts.amazonaws.com'
+      Policies:
+        - PolicyName: AWSLoadBalancerControllerIAMPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - iam:CreateServiceLinkedRole
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    iam:AWSServiceName: elasticloadbalancing.amazonaws.com
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeAccountAttributes
+                  - ec2:DescribeAddresses
+                  - ec2:DescribeAvailabilityZones
+                  - ec2:DescribeInternetGateways
+                  - ec2:DescribeVpcs
+                  - ec2:DescribeVpcPeeringConnections
+                  - ec2:DescribeSubnets
+                  - ec2:DescribeSecurityGroups
+                  - ec2:DescribeInstances
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DescribeTags
+                  - ec2:GetCoipPoolUsage
+                  - ec2:GetManagedPrefixListEntries
+                  - ec2:DescribeCoipPools
+                  - elasticloadbalancing:DescribeLoadBalancers
+                  - elasticloadbalancing:DescribeLoadBalancerAttributes
+                  - elasticloadbalancing:DescribeListeners
+                  - elasticloadbalancing:DescribeListenerCertificates
+                  - elasticloadbalancing:DescribeSSLPolicies
+                  - elasticloadbalancing:DescribeRules
+                  - elasticloadbalancing:DescribeTargetGroups
+                  - elasticloadbalancing:DescribeTargetGroupAttributes
+                  - elasticloadbalancing:DescribeTargetHealth
+                  - elasticloadbalancing:DescribeTags
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - cognito-idp:DescribeUserPoolClient
+                  - acm:ListCertificates
+                  - acm:DescribeCertificate
+                  - iam:ListServerCertificates
+                  - iam:GetServerCertificate
+                  - waf-regional:GetWebACL
+                  - waf-regional:GetWebACLForResource
+                  - waf-regional:AssociateWebACL
+                  - waf-regional:DisassociateWebACL
+                  - wafv2:GetWebACL
+                  - wafv2:GetWebACLForResource
+                  - wafv2:AssociateWebACL
+                  - wafv2:DisassociateWebACL
+                  - shield:DescribeProtection
+                  - shield:GetSubscriptionState
+                  - shield:DescribeSubscription
+                  - shield:CreateProtection
+                  - shield:DeleteProtection
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ec2:AuthorizeSecurityGroupIngress
+                  - ec2:RevokeSecurityGroupIngress
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ec2:CreateSecurityGroup
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ec2:CreateTags
+                Resource: arn:aws:ec2:*:*:security-group/*
+                Condition:
+                  StringEquals:
+                    ec2:CreateAction: CreateSecurityGroup
+                  Null:
+                    aws:RequestedRegion: 'false'
+              - Effect: Allow
+                Action:
+                  - elasticloadbalancing:CreateLoadBalancer
+                  - elasticloadbalancing:CreateTargetGroup
+                Resource: '*'
+                Condition:
+                  Null:
+                    aws:RequestedRegion: 'false'
+              - Effect: Allow
+                Action:
+                  - elasticloadbalancing:CreateListener
+                  - elasticloadbalancing:DeleteListener
+                  - elasticloadbalancing:CreateRule
+                  - elasticloadbalancing:DeleteRule
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - elasticloadbalancing:AddTags
+                  - elasticloadbalancing:RemoveTags
+                Resource:
+                  - arn:aws:elasticloadbalancing:*:*:targetgroup/*/*
+                  - arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*
+                  - arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*
+                Condition:
+                  Null:
+                    aws:RequestedRegion: 'false'
+                    aws:ResourceTag/elbv2.k8s.aws/cluster: 'false'
+              - Effect: Allow
+                Action:
+                  - elasticloadbalancing:ModifyLoadBalancerAttributes
+                  - elasticloadbalancing:SetIpAddressType
+                  - elasticloadbalancing:SetSecurityGroups
+                  - elasticloadbalancing:SetSubnets
+                  - elasticloadbalancing:DeleteLoadBalancer
+                  - elasticloadbalancing:ModifyTargetGroup
+                  - elasticloadbalancing:ModifyTargetGroupAttributes
+                  - elasticloadbalancing:DeleteTargetGroup
+                Resource: '*'
+                Condition:
+                  Null:
+                    aws:ResourceTag/elbv2.k8s.aws/cluster: 'false'
+              - Effect: Allow
+                Action:
+                  - elasticloadbalancing:RegisterTargets
+                  - elasticloadbalancing:DeregisterTargets
+                Resource: arn:aws:elasticloadbalancing:*:*:targetgroup/*/*
+              - Effect: Allow
+                Action:
+                  - elasticloadbalancing:SetWebAcl
+                  - elasticloadbalancing:ModifyListener
+                  - elasticloadbalancing:AddListenerCertificates
+                  - elasticloadbalancing:RemoveListenerCertificates
+                  - elasticloadbalancing:ModifyRule
+                Resource: '*'
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+
+  # EKS Addon - EBS CSI Driver
+  EBSCSIDriverAddon:
+    Type: AWS::EKS::Addon
+    Properties:
+      ClusterName: !Ref EKSClusterName
+      AddonName: aws-ebs-csi-driver
+      AddonVersion: v1.21.0-eksbuild.1
+      ServiceAccountRoleArn: !GetAtt EBSCSIDriverRole.Arn
+      ResolveConflicts: OVERWRITE
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+
+Outputs:
+  EBSCSIDriverRoleArn:
+    Description: EBS CSI Driver Role ARN
+    Value: !GetAtt EBSCSIDriverRole.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-EBS-CSI-Role-ARN'
+
+  AWSLoadBalancerControllerRoleArn:
+    Description: AWS Load Balancer Controller Role ARN
+    Value: !GetAtt AWSLoadBalancerControllerRole.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-ALB-Controller-Role-ARN'
