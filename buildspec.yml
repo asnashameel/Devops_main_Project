@@ -50,10 +50,10 @@ phases:
   post_build:
     commands:
       - echo Pushing frontend image to ECR...
-      - docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${FRONTEND_REPO}:${IMAGE_TAG}
+      - docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${FRONTEND_REPO}:${IMAGE_TAG}
 
       - echo Pushing backend image to ECR...
-      - docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${BACKEND_REPO}:${IMAGE_TAG}
+      - docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${BACKEND_REPO}:${IMAGE_TAG}
 
       - echo Updating Kubernetes manifests...
       - mkdir -p k8s-out
