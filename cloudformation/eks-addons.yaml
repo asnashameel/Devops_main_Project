@@ -33,8 +33,9 @@ Resources:
             Action: sts:AssumeRoleWithWebIdentity
             Condition:
               StringEquals:
-                Fn::Sub: !Join ['', [!Ref EKSClusterOIDCIssuer, ':sub']] : 'system:serviceaccount:kube-system:ebs-csi-controller-sa'
-                Fn::Sub: !Join ['', [!Ref EKSClusterOIDCIssuer, ':aud']] : 'sts.amazonaws.com'
+                # REVERTED TO ORIGINAL CORRECT SYNTAX
+                !Sub "${EKSClusterOIDCIssuer}:sub": 'system:serviceaccount:kube-system:ebs-csi-controller-sa'
+                !Sub "${EKSClusterOIDCIssuer}:aud": 'sts.amazonaws.com'
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
       Tags:
@@ -55,8 +56,9 @@ Resources:
             Action: sts:AssumeRoleWithWebIdentity
             Condition:
               StringEquals:
-                Fn::Sub: !Join ['', [!Ref EKSClusterOIDCIssuer, ':sub']] : 'system:serviceaccount:kube-system:aws-load-balancer-controller'
-                Fn::Sub: !Join ['', [!Ref EKSClusterOIDCIssuer, ':aud']] : 'sts.amazonaws.com'
+                # REVERTED TO ORIGINAL CORRECT SYNTAX
+                !Sub "${EKSClusterOIDCIssuer}:sub": 'system:serviceaccount:kube-system:aws-load-balancer-controller'
+                !Sub "${EKSClusterOIDCIssuer}:aud": 'sts.amazonaws.com'
       Policies:
         - PolicyName: AWSLoadBalancerControllerIAMPolicy
           PolicyDocument:
