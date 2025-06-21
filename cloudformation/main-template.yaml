@@ -393,8 +393,8 @@ Resources:
           - !Ref PrivateSubnet1
           - !Ref PrivateSubnet2
           - !Ref PrivateSubnet3
-        EndpointConfigPrivate: false
-        EndpointConfigPublic: true
+        EndpointPublicAccess: true  
+        EndpointPrivateAccess: true
       Tags:
         - Key: Name
           Value: !Ref ProjectName
