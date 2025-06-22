@@ -14,6 +14,7 @@ phases:
       python: 3.11
     commands:
       - echo Installing Terraform...
+      - rm -rf terraform
       - wget -O terraform.zip https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip
       - unzip -o terraform.zip
       - mv terraform /usr/local/bin/
