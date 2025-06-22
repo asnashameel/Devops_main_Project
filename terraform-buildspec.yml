@@ -28,7 +28,6 @@ phases:
   pre_build:
     commands:
       - echo Configuring Terraform backend...
-      - cd terraform
       - echo "terraform {"                                    > backend.tf
       - echo "  backend \"s3\" {"                           >> backend.tf
       - echo "    bucket         = \"${AWS_ACCOUNT_ID}-terraform-state\""  >> backend.tf
