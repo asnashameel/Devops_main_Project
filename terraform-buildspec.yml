@@ -2,6 +2,7 @@ version: 0.2
 
 env:
   variables:
+    AWS_ACCOUNT_ID: "715841362372"
     AWS_DEFAULT_REGION: us-west-2
     TF_VERSION: "1.6.6"
     TERRAFORM_ACTION: "apply"  # Can be: plan, apply, destroy
