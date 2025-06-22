@@ -24,10 +24,14 @@ phases:
       - chmod +x ./kubectl
       - mv ./kubectl /usr/local/bin/kubectl
       - kubectl version --short --client
-      - echo Installing Helm...
-      - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+      - echo "Installing Helm..."
+      - HELM_VERSION="v3.15.0" # You can choose a specific stable Helm 3 version
+      - HELM_TAR="helm-${HELM_VERSION}-linux-amd64.tar.gz"
+      - wget -O /tmp/${HELM_TAR} https://get.helm.sh/${HELM_TAR}
+      - tar -zxvf /tmp/${HELM_TAR} -C /tmp/
+      - mv /tmp/linux-amd64/helm /usr/local/bin/helm
+      - rm -rf /tmp/${HELM_TAR} /tmp/linux-amd64
       - helm version --short
-
   pre_build:
     commands:
       - aws sts get-caller-identity
