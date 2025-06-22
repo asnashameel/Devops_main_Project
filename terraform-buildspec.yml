@@ -30,7 +30,7 @@ phases:
       - echo Configuring Terraform backend...
       - echo "terraform {"                                    > backend.tf
       - echo "  backend \"s3\" {"                           >> backend.tf
-      - echo "    bucket         = \"${AWS_ACCOUNT_ID}-terraform-state\""  >> backend.tf
+      - echo "    bucket         = \"${AWS_ACCOUNT_ID}-terraform-state-7736\""  >> backend.tf
       - echo "    key            = \"cloudops/terraform.tfstate\""         >> backend.tf
       - echo "    region         = \"${AWS_DEFAULT_REGION}\""              >> backend.tf
       - echo "    encrypt        = true"                                    >> backend.tf
