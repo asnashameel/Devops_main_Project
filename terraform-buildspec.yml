@@ -52,7 +52,6 @@ phases:
   build:
     commands:
       - echo Starting Terraform ${TERRAFORM_ACTION}...
-      - cd terraform
       - |
         case "${TERRAFORM_ACTION}" in
           "plan")
@@ -78,7 +77,6 @@ phases:
   post_build:
     commands:
       - echo Terraform ${TERRAFORM_ACTION} completed successfully!
-      - cd terraform
       - |
         if [ "${TERRAFORM_ACTION}" = "apply" ]; then
           echo "=== Infrastructure Outputs ==="
