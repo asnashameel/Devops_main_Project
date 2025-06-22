@@ -42,6 +42,7 @@ phases:
       - echo "    dynamodb_table = \"terraform-locks\"" >> backend.tf
       - echo "  }" >> backend.tf
       - echo "}" >> backend.tf
+      - terraform force-unlock 5ccae578-acd3-8f0b-647e-ff02b6be8439 -force || true
       - echo Creating terraform.tfvars...
       - echo "aws_region = \"${AWS_DEFAULT_REGION}\"" > terraform.tfvars
       - echo "environment = \"demo\"" >> terraform.tfvars
