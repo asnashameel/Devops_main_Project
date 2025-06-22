@@ -53,6 +53,30 @@ phases:
       - echo "db_password = \"${DB_PASSWORD}\"" >> terraform.tfvars
       - echo Initializing Terraform...
       - terraform init
+      - echo "Checking for existing conflicting resources..."
+      - |
+        # Clean up existing resources that might conflict (in proper order)
+        echo "Checking for existing EKS addon (aws-ebs-csi-driver)..."
+        # Attempts to delete the addon. '|| echo' prevents the script from failing
+        # if the addon doesn't exist, which is expected for a clean state.
+        aws eks delete-addon --cluster-name cloudops-demo --addon-name aws-ebs-csi-driver --region ${AWS_DEFAULT_REGION} || echo "EKS addon 'aws-ebs-csi-driver' not found or already deleted."
+      
+        echo "Waiting 30 seconds for addon deletion to propagate..."
+        sleep 30 # Give AWS time to process the deletion before proceeding.
+      
+        echo "Checking for existing IAM role policy attachments for Load Balancer Controller..."
+        # Detaches the policy from the role. The policy must be detached before the role can be deleted.
+        aws iam detach-role-policy --role-name cloudops-demo-aws-load-balancer-controller --policy-arn arn:aws:iam::${AWS_ACCOUNT_ID}:policy/cloudops-demo-aws-load-balancer-controller || echo "Load Balancer Controller policy attachment not found or already detached."
+      
+        echo "Checking for existing IAM role for Load Balancer Controller..."
+        # Deletes the role.
+        aws iam delete-role --role-name cloudops-demo-aws-load-balancer-controller || echo "Load Balancer Controller IAM role not found or already deleted."
+      
+        echo "Checking for existing IAM policy for Load Balancer Controller..."
+        # Deletes the policy. Policies can only be deleted after they are no longer attached to any roles.
+        aws iam delete-policy --policy-arn arn:aws:iam::${AWS_ACCOUNT_ID}:policy/cloudops-demo-aws-load-balancer-controller || echo "Load Balancer Controller IAM policy not found or already deleted."
+      
+        echo "Existing resource cleanup completed."
 
   build:
     commands:
