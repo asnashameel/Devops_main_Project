@@ -1,0 +1,100 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: us-west-2
+    TF_VERSION: "1.6.6"
+    TERRAFORM_ACTION: "apply"  # Can be: plan, apply, destroy
+  parameter-store:
+    DB_PASSWORD: /cloudops-demo/db-password
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - echo Installing Terraform...
+      - wget -O terraform.zip https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip
+      - unzip terraform.zip
+      - mv terraform /usr/local/bin/
+      - terraform --version
+      - echo Installing AWS CLI...
+      - pip install --upgrade awscli
+      - aws --version
+      - echo Verifying git availability...
+      - git --version
+
+  pre_build:
+    commands:
+      - echo Configuring Terraform backend...
+      - cd terraform
+      - echo "terraform {"                                    > backend.tf
+      - echo "  backend \"s3\" {"                           >> backend.tf
+      - echo "    bucket         = \"${AWS_ACCOUNT_ID}-terraform-state\""  >> backend.tf
+      - echo "    key            = \"cloudops/terraform.tfstate\""         >> backend.tf
+      - echo "    region         = \"${AWS_DEFAULT_REGION}\""              >> backend.tf
+      - echo "    encrypt        = true"                                    >> backend.tf
+      - echo "    dynamodb_table = \"terraform-locks\""                    >> backend.tf
+      - echo "  }"                                          >> backend.tf
+      - echo "}"                                            >> backend.tf
+      - echo Creating terraform.tfvars...
+      - echo "aws_region = \"${AWS_DEFAULT_REGION}\""       > terraform.tfvars
+      - echo "environment = \"demo\""                      >> terraform.tfvars
+      - echo "cluster_name = \"cloudops-demo\""            >> terraform.tfvars
+      - echo "kubernetes_version = \"1.27\""               >> terraform.tfvars
+      - echo "db_name = \"cloudops_demo\""                 >> terraform.tfvars
+      - echo "db_username = \"postgres\""                  >> terraform.tfvars
+      - echo "db_password = \"${DB_PASSWORD}\""            >> terraform.tfvars
+      - echo Initializing Terraform...
+      - terraform init
+
+  build:
+    commands:
+      - echo Starting Terraform ${TERRAFORM_ACTION}...
+      - cd terraform
+      - |
+        case "${TERRAFORM_ACTION}" in
+          "plan")
+            echo "Running terraform plan..."
+            terraform plan -out=tfplan -var-file=terraform.tfvars
+            ;;
+          "apply")
+            echo "Running terraform plan and apply..."
+            terraform plan -out=tfplan -var-file=terraform.tfvars
+            terraform apply -auto-approve tfplan
+            ;;
+          "destroy")
+            echo "Running terraform destroy..."
+            terraform destroy -auto-approve -var-file=terraform.tfvars
+            ;;
+          *)
+            echo "Invalid TERRAFORM_ACTION: ${TERRAFORM_ACTION}"
+            echo "Valid options: plan, apply, destroy"
+            exit 1
+            ;;
+        esac
+
+  post_build:
+    commands:
+      - echo Terraform ${TERRAFORM_ACTION} completed successfully!
+      - cd terraform
+      - |
+        if [ "${TERRAFORM_ACTION}" = "apply" ]; then
+          echo "=== Infrastructure Outputs ==="
+          terraform output
+          echo "=== Setting up kubectl ==="
+          aws eks update-kubeconfig --region ${AWS_DEFAULT_REGION} --name cloudops-demo
+          kubectl get nodes
+        fi
+
+artifacts:
+  files:
+    - terraform/tfplan
+    - terraform/*.tf
+    - terraform/terraform.tfvars
+    - terraform/terraform.tfstate.backup
+  name: terraform-artifacts
+
+cache:
+  paths:
+    - terraform/.terraform/**/*

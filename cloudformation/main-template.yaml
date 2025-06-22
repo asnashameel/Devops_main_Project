@@ -393,7 +393,7 @@ Resources:
           - !Ref PrivateSubnet1
           - !Ref PrivateSubnet2
           - !Ref PrivateSubnet3
-        EndpointPublicAccess: true  
+        EndpointPublicAccess: true
         EndpointPrivateAccess: true
       Tags:
         - Key: Name
