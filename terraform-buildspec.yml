@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    AWS_DEFAULT_REGION: us-west-2
+    AWS_DEFAULT_REGION: us-east-1
     TF_VERSION: "1.6.6"
     TERRAFORM_ACTION: "apply"  # Can be: plan, apply, destroy
   parameter-store:
@@ -15,7 +15,7 @@ phases:
     commands:
       - echo Installing Terraform...
       - wget -O terraform.zip https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip
-      - unzip terraform.zip
+      - unzip -o terraform.zip
       - mv terraform /usr/local/bin/
       - terraform --version
       - echo Installing AWS CLI...
