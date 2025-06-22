@@ -4,14 +4,15 @@ env:
   variables:
     AWS_DEFAULT_REGION: us-west-2
     AWS_ACCOUNT_ID: "715841362372"
-    REGION: us-west-2
-    FRONTEND_REPO: cloudops-frontend
-    BACKEND_REPO: cloudops-backend
+    REGION: us-east-1
+    FRONTEND_REPO: dev-frontend
+    BACKEND_REPO: dev-backend
     FRONTEND_DIR: frontend
     BACKEND_DIR: backend
     K8S_MANIFEST_DIR: k8s
-    CLUSTER_NAME: cloudops-demo
+    CLUSTER_NAME: kube-cluster
     IMAGE_TAG: latest
+    EKS_KUBECTL_ROLE_ARN: "arn:aws:iam::207567798584:role/eksctl-kube-cluster-cluster-ServiceRole-quAvHhmVUyWq"
 
 phases:
   install:
