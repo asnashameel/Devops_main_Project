@@ -17,6 +17,7 @@ Parameters:
   EKSClusterOIDCIssuer:
     Type: String
     Description: EKS cluster OIDC issuer URL (without https://)
+
 Resources:
   EBSCSIDriverRole:
     Type: AWS::IAM::Role
@@ -31,15 +32,19 @@ Resources:
             Action: sts:AssumeRoleWithWebIdentity
             Condition:
               StringEquals:
-                # Using Fn::Join with flow-style list for the key
-                !Join [":", [!Ref EKSClusterOIDCIssuer, "sub"]]: "system:serviceaccount:kube-system:ebs-csi-controller-sa"
-                !Join [":", [!Ref EKSClusterOIDCIssuer, "aud"]]: "sts.amazonaws.com"
+                Fn::Sub:
+                  - >
+                    {
+                      "${OIDC}:sub": "system:serviceaccount:kube-system:ebs-csi-controller-sa",
+                      "${OIDC}:aud": "sts.amazonaws.com"
+                    }
+                  - { OIDC: !Ref EKSClusterOIDCIssuer }
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
       Tags:
         - Key: Project
           Value: !Ref ProjectName
-  
+
   AWSLoadBalancerControllerRole:
     Type: AWS::IAM::Role
     Properties:
@@ -53,9 +58,13 @@ Resources:
             Action: sts:AssumeRoleWithWebIdentity
             Condition:
               StringEquals:
-                # Using Fn::Join with flow-style list for the key
-                !Join [":", [!Ref EKSClusterOIDCIssuer, "sub"]]: 'system:serviceaccount:kube-system:aws-load-balancer-controller'
-                !Join [":", [!Ref EKSClusterOIDCIssuer, "aud"]]: 'sts.amazonaws.com'
+                Fn::Sub:
+                  - >
+                    {
+                      "${OIDC}:sub": "system:serviceaccount:kube-system:aws-load-balancer-controller",
+                      "${OIDC}:aud": "sts.amazonaws.com"
+                    }
+                  - { OIDC: !Ref EKSClusterOIDCIssuer }
       Policies:
         - PolicyName: AWSLoadBalancerControllerIAMPolicy
           PolicyDocument:
@@ -70,30 +79,8 @@ Resources:
                     iam:AWSServiceName: elasticloadbalancing.amazonaws.com
               - Effect: Allow
                 Action:
-                  - ec2:DescribeAccountAttributes
-                  - ec2:DescribeAddresses
-                  - ec2:DescribeAvailabilityZones
-                  - ec2:DescribeInternetGateways
-                  - ec2:DescribeVpcs
-                  - ec2:DescribeVpcPeeringConnections
-                  - ec2:DescribeSubnets
-                  - ec2:DescribeSecurityGroups
-                  - ec2:DescribeInstances
-                  - ec2:DescribeNetworkInterfaces
-                  - ec2:DescribeTags
-                  - ec2:GetCoipPoolUsage
-                  - ec2:GetManagedPrefixListEntries
-                  - ec2:DescribeCoipPools
-                  - elasticloadbalancing:DescribeLoadBalancers
-                  - elasticloadbalancing:DescribeLoadBalancerAttributes
-                  - elasticloadbalancing:DescribeListeners
-                  - elasticloadbalancing:DescribeListenerCertificates
-                  - elasticloadbalancing:DescribeSSLPolicies
-                  - elasticloadbalancing:DescribeRules
-                  - elasticloadbalancing:DescribeTargetGroups
-                  - elasticloadbalancing:DescribeTargetGroupAttributes
-                  - elasticloadbalancing:DescribeTargetHealth
-                  - elasticloadbalancing:DescribeTags
+                  - ec2:Describe*
+                  - elasticloadbalancing:Describe*
                 Resource: '*'
               - Effect: Allow
                 Action:
@@ -208,7 +195,7 @@ Resources:
       Tags:
         - Key: Project
           Value: !Ref ProjectName
-  
+
   EBSCSIDriverAddon:
     Type: AWS::EKS::Addon
     Properties:
