@@ -76,7 +76,7 @@ Resources:
                 Resource: '*'
                 Condition:
                   StringEquals:
-                    iam:AWSServiceName: elasticloadbalancing.amazonaws.com
+                    "iam:AWSServiceName": "elasticloadbalancing.amazonaws.com"
 
               - Effect: Allow
                 Action:
@@ -123,9 +123,9 @@ Resources:
                 Resource: arn:aws:ec2:*:*:security-group/*
                 Condition:
                   StringEquals:
-                    ec2:CreateAction: CreateSecurityGroup
+                    "ec2:CreateAction": "CreateSecurityGroup"
                   Null:
-                    aws:RequestedRegion: "false"
+                    "aws:RequestedRegion": "false"
 
               - Effect: Allow
                 Action:
@@ -133,9 +133,9 @@ Resources:
                 Resource: arn:aws:ec2:*:*:network-interface/*
                 Condition:
                   StringEquals:
-                    ec2:CreateAction: CreateNetworkInterface
+                    "ec2:CreateAction": "CreateNetworkInterface"
                   Null:
-                    aws:RequestedRegion: "false"
+                    "aws:RequestedRegion": "false"
 
               - Effect: Allow
                 Action:
@@ -153,7 +153,7 @@ Resources:
                 Resource: '*'
                 Condition:
                   Null:
-                    aws:RequestedRegion: "false"
+                    "aws:RequestedRegion": "false"
 
               - Effect: Allow
                 Action:
@@ -173,8 +173,8 @@ Resources:
                   - arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*
                 Condition:
                   Null:
-                    aws:RequestedRegion: "false"
-                    aws:ResourceTag/elbv2.k8s.aws/cluster: "false"
+                    "aws:RequestedRegion": "false"
+                    "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
 
               - Effect: Allow
                 Action:
@@ -189,7 +189,7 @@ Resources:
                 Resource: '*'
                 Condition:
                   Null:
-                    aws:ResourceTag/elbv2.k8s.aws/cluster: "false"
+                    "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
 
               - Effect: Allow
                 Action:
