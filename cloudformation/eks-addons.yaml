@@ -77,11 +77,13 @@ Resources:
                 Condition:
                   StringEquals:
                     iam:AWSServiceName: elasticloadbalancing.amazonaws.com
+
               - Effect: Allow
                 Action:
                   - ec2:Describe*
                   - elasticloadbalancing:Describe*
                 Resource: '*'
+
               - Effect: Allow
                 Action:
                   - cognito-idp:DescribeUserPoolClient
@@ -103,33 +105,50 @@ Resources:
                   - shield:CreateProtection
                   - shield:DeleteProtection
                 Resource: '*'
+
               - Effect: Allow
                 Action:
                   - ec2:CreateSecurityGroup
                 Resource: '*'
+
               - Effect: Allow
                 Action:
                   - ec2:AuthorizeSecurityGroupIngress
                   - ec2:RevokeSecurityGroupIngress
                 Resource: '*'
+
               - Effect: Allow
                 Action:
                   - ec2:CreateTags
                 Resource: arn:aws:ec2:*:*:security-group/*
                 Condition:
-                  StringEquals:
-                    ec2:CreateAction: CreateSecurityGroup
-                  Null:
-                    aws:RequestedRegion: "false"
+                  Fn::Sub:
+                    - >
+                      {
+                        "StringEquals": {
+                          "ec2:CreateAction": "CreateSecurityGroup"
+                        },
+                        "Null": {
+                          "aws:RequestedRegion": "false"
+                        }
+                      }
+
               - Effect: Allow
                 Action:
                   - ec2:CreateTags
                 Resource: arn:aws:ec2:*:*:network-interface/*
                 Condition:
-                  StringEquals:
-                    ec2:CreateAction: CreateNetworkInterface
-                  Null:
-                    aws:RequestedRegion: "false"
+                  Fn::Sub:
+                    - >
+                      {
+                        "StringEquals": {
+                          "ec2:CreateAction": "CreateNetworkInterface"
+                        },
+                        "Null": {
+                          "aws:RequestedRegion": "false"
+                        }
+                      }
+
               - Effect: Allow
                 Action:
                   - ec2:CreateNetworkInterface
@@ -138,6 +157,7 @@ Resources:
                   - ec2:UnassignPrivateIpAddresses
                   - ec2:ModifyNetworkInterfaceAttribute
                 Resource: '*'
+
               - Effect: Allow
                 Action:
                   - elasticloadbalancing:CreateLoadBalancer
@@ -146,6 +166,7 @@ Resources:
                 Condition:
                   Null:
                     aws:RequestedRegion: "false"
+
               - Effect: Allow
                 Action:
                   - elasticloadbalancing:CreateListener
@@ -153,6 +174,7 @@ Resources:
                   - elasticloadbalancing:CreateRule
                   - elasticloadbalancing:DeleteRule
                 Resource: '*'
+
               - Effect: Allow
                 Action:
                   - elasticloadbalancing:AddTags
@@ -162,9 +184,15 @@ Resources:
                   - arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*
                   - arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*
                 Condition:
-                  Null:
-                    aws:RequestedRegion: "false"
-                    aws:ResourceTag/elbv2.k8s.aws/cluster: "false"
+                  Fn::Sub:
+                    - >
+                      {
+                        "Null": {
+                          "aws:RequestedRegion": "false",
+                          "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
+                        }
+                      }
+
               - Effect: Allow
                 Action:
                   - elasticloadbalancing:ModifyLoadBalancerAttributes
@@ -179,11 +207,13 @@ Resources:
                 Condition:
                   Null:
                     aws:ResourceTag/elbv2.k8s.aws/cluster: "false"
+
               - Effect: Allow
                 Action:
                   - elasticloadbalancing:RegisterTargets
                   - elasticloadbalancing:DeregisterTargets
                 Resource: arn:aws:elasticloadbalancing:*:*:targetgroup/*/*
+
               - Effect: Allow
                 Action:
                   - elasticloadbalancing:SetWebAcl
