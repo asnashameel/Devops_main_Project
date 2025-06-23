@@ -122,32 +122,20 @@ Resources:
                   - ec2:CreateTags
                 Resource: arn:aws:ec2:*:*:security-group/*
                 Condition:
-                  Fn::Sub:
-                    - >
-                      {
-                        "StringEquals": {
-                          "ec2:CreateAction": "CreateSecurityGroup"
-                        },
-                        "Null": {
-                          "aws:RequestedRegion": "false"
-                        }
-                      }
+                  StringEquals:
+                    ec2:CreateAction: CreateSecurityGroup
+                  Null:
+                    aws:RequestedRegion: "false"
 
               - Effect: Allow
                 Action:
                   - ec2:CreateTags
                 Resource: arn:aws:ec2:*:*:network-interface/*
                 Condition:
-                  Fn::Sub:
-                    - >
-                      {
-                        "StringEquals": {
-                          "ec2:CreateAction": "CreateNetworkInterface"
-                        },
-                        "Null": {
-                          "aws:RequestedRegion": "false"
-                        }
-                      }
+                  StringEquals:
+                    ec2:CreateAction: CreateNetworkInterface
+                  Null:
+                    aws:RequestedRegion: "false"
 
               - Effect: Allow
                 Action:
@@ -184,14 +172,9 @@ Resources:
                   - arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*
                   - arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*
                 Condition:
-                  Fn::Sub:
-                    - >
-                      {
-                        "Null": {
-                          "aws:RequestedRegion": "false",
-                          "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
-                        }
-                      }
+                  Null:
+                    aws:RequestedRegion: "false"
+                    aws:ResourceTag/elbv2.k8s.aws/cluster: "false"
 
               - Effect: Allow
                 Action:
