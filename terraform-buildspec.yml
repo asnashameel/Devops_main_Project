@@ -27,9 +27,15 @@ phases:
       - aws --version
       - echo Verifying git availability...
       - git --version
-      - echo Importing existing IAM roles into Terraform state...
-      - terraform import module.iam.aws_iam_role.codebuild cloudops-demo-codebuild-role
-      - terraform import module.iam.aws_iam_role.rds_enhanced_monitoring cloudops-demo-rds-enhanced-monitoring
+      - cd modules/iam
+      - terraform init -input=false
+
+      - echo Importing existing IAM roles...
+      - terraform import aws_iam_role.codebuild cloudops-demo-codebuild-role
+      - terraform import aws_iam_role.rds_enhanced_monitoring cloudops-demo-rds-enhanced-monitoring
+
+      - echo Returning to root directory...
+      - cd ../..
 
   pre_build:
     commands:
