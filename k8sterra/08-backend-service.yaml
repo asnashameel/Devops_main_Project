@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: backend-service
   namespace: cloudops-demo
+  annotations:
+    #alb.ingress.kubernetes.io/healthcheck-path: /health
   labels:
     app: backend
     tier: backend
