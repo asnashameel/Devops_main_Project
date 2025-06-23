@@ -19,6 +19,7 @@ Parameters:
     Description: EKS cluster OIDC issuer URL (without https://)
 
 Resources:
+  # EBS CSI Driver IAM Role
   EBSCSIDriverRole:
     Type: AWS::IAM::Role
     Properties:
@@ -31,20 +32,17 @@ Resources:
               Federated: !Sub 'arn:aws:iam::${AWS::AccountId}:oidc-provider/${EKSClusterOIDCIssuer}'
             Action: sts:AssumeRoleWithWebIdentity
             Condition:
-              StringEquals:
-                Fn::Sub:
-                  - >
-                    {
-                      "${OIDC}:sub": "system:serviceaccount:kube-system:ebs-csi-controller-sa",
-                      "${OIDC}:aud": "sts.amazonaws.com"
-                    }
-                  - { OIDC: !Ref EKSClusterOIDCIssuer }
+              StringEquals: !Sub
+                - '${OIDCIssuer}:sub': 'system:serviceaccount:kube-system:ebs-csi-controller-sa'
+                  '${OIDCIssuer}:aud': 'sts.amazonaws.com'
+                - OIDCIssuer: !Ref EKSClusterOIDCIssuer
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
       Tags:
         - Key: Project
           Value: !Ref ProjectName
 
+  # AWS Load Balancer Controller IAM Role
   AWSLoadBalancerControllerRole:
     Type: AWS::IAM::Role
     Properties:
@@ -57,14 +55,10 @@ Resources:
               Federated: !Sub 'arn:aws:iam::${AWS::AccountId}:oidc-provider/${EKSClusterOIDCIssuer}'
             Action: sts:AssumeRoleWithWebIdentity
             Condition:
-              StringEquals:
-                Fn::Sub:
-                  - >
-                    {
-                      "${OIDC}:sub": "system:serviceaccount:kube-system:aws-load-balancer-controller",
-                      "${OIDC}:aud": "sts.amazonaws.com"
-                    }
-                  - { OIDC: !Ref EKSClusterOIDCIssuer }
+              StringEquals: !Sub
+                - '${OIDCIssuer}:sub': 'system:serviceaccount:kube-system:aws-load-balancer-controller'
+                  '${OIDCIssuer}:aud': 'sts.amazonaws.com'
+                - OIDCIssuer: !Ref EKSClusterOIDCIssuer
       Policies:
         - PolicyName: AWSLoadBalancerControllerIAMPolicy
           PolicyDocument:
@@ -76,14 +70,34 @@ Resources:
                 Resource: '*'
                 Condition:
                   StringEquals:
-                    "iam:AWSServiceName": "elasticloadbalancing.amazonaws.com"
-
+                    iam:AWSServiceName: elasticloadbalancing.amazonaws.com
               - Effect: Allow
                 Action:
-                  - ec2:Describe*
-                  - elasticloadbalancing:Describe*
+                  - ec2:DescribeAccountAttributes
+                  - ec2:DescribeAddresses
+                  - ec2:DescribeAvailabilityZones
+                  - ec2:DescribeInternetGateways
+                  - ec2:DescribeVpcs
+                  - ec2:DescribeVpcPeeringConnections
+                  - ec2:DescribeSubnets
+                  - ec2:DescribeSecurityGroups
+                  - ec2:DescribeInstances
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DescribeTags
+                  - ec2:GetCoipPoolUsage
+                  - ec2:GetManagedPrefixListEntries
+                  - ec2:DescribeCoipPools
+                  - elasticloadbalancing:DescribeLoadBalancers
+                  - elasticloadbalancing:DescribeLoadBalancerAttributes
+                  - elasticloadbalancing:DescribeListeners
+                  - elasticloadbalancing:DescribeListenerCertificates
+                  - elasticloadbalancing:DescribeSSLPolicies
+                  - elasticloadbalancing:DescribeRules
+                  - elasticloadbalancing:DescribeTargetGroups
+                  - elasticloadbalancing:DescribeTargetGroupAttributes
+                  - elasticloadbalancing:DescribeTargetHealth
+                  - elasticloadbalancing:DescribeTags
                 Resource: '*'
-
               - Effect: Allow
                 Action:
                   - cognito-idp:DescribeUserPoolClient
@@ -105,47 +119,24 @@ Resources:
                   - shield:CreateProtection
                   - shield:DeleteProtection
                 Resource: '*'
-
-              - Effect: Allow
-                Action:
-                  - ec2:CreateSecurityGroup
-                Resource: '*'
-
               - Effect: Allow
                 Action:
                   - ec2:AuthorizeSecurityGroupIngress
                   - ec2:RevokeSecurityGroupIngress
                 Resource: '*'
-
+              - Effect: Allow
+                Action:
+                  - ec2:CreateSecurityGroup
+                Resource: '*'
               - Effect: Allow
                 Action:
                   - ec2:CreateTags
                 Resource: arn:aws:ec2:*:*:security-group/*
                 Condition:
                   StringEquals:
-                    "ec2:CreateAction": "CreateSecurityGroup"
+                    ec2:CreateAction: CreateSecurityGroup
                   Null:
-                    "aws:RequestedRegion": "false"
-
-              - Effect: Allow
-                Action:
-                  - ec2:CreateTags
-                Resource: arn:aws:ec2:*:*:network-interface/*
-                Condition:
-                  StringEquals:
-                    "ec2:CreateAction": "CreateNetworkInterface"
-                  Null:
-                    "aws:RequestedRegion": "false"
-
-              - Effect: Allow
-                Action:
-                  - ec2:CreateNetworkInterface
-                  - ec2:DeleteNetworkInterface
-                  - ec2:AssignPrivateIpAddresses
-                  - ec2:UnassignPrivateIpAddresses
-                  - ec2:ModifyNetworkInterfaceAttribute
-                Resource: '*'
-
+                    aws:RequestedRegion: 'false'
               - Effect: Allow
                 Action:
                   - elasticloadbalancing:CreateLoadBalancer
@@ -153,8 +144,7 @@ Resources:
                 Resource: '*'
                 Condition:
                   Null:
-                    "aws:RequestedRegion": "false"
-
+                    aws:RequestedRegion: 'false'
               - Effect: Allow
                 Action:
                   - elasticloadbalancing:CreateListener
@@ -162,7 +152,6 @@ Resources:
                   - elasticloadbalancing:CreateRule
                   - elasticloadbalancing:DeleteRule
                 Resource: '*'
-
               - Effect: Allow
                 Action:
                   - elasticloadbalancing:AddTags
@@ -173,9 +162,8 @@ Resources:
                   - arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*
                 Condition:
                   Null:
-                    "aws:RequestedRegion": "false"
-                    "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
-
+                    aws:RequestedRegion: 'false'
+                    aws:ResourceTag/elbv2.k8s.aws/cluster: 'false'
               - Effect: Allow
                 Action:
                   - elasticloadbalancing:ModifyLoadBalancerAttributes
@@ -189,14 +177,12 @@ Resources:
                 Resource: '*'
                 Condition:
                   Null:
-                    "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
-
+                    aws:ResourceTag/elbv2.k8s.aws/cluster: 'false'
               - Effect: Allow
                 Action:
                   - elasticloadbalancing:RegisterTargets
                   - elasticloadbalancing:DeregisterTargets
                 Resource: arn:aws:elasticloadbalancing:*:*:targetgroup/*/*
-
               - Effect: Allow
                 Action:
                   - elasticloadbalancing:SetWebAcl
@@ -209,6 +195,7 @@ Resources:
         - Key: Project
           Value: !Ref ProjectName
 
+  # EKS Addon - EBS CSI Driver
   EBSCSIDriverAddon:
     Type: AWS::EKS::Addon
     Properties:
@@ -216,7 +203,8 @@ Resources:
       AddonName: aws-ebs-csi-driver
       AddonVersion: v1.21.0-eksbuild.1
       ServiceAccountRoleArn: !GetAtt EBSCSIDriverRole.Arn
-      ResolveConflicts: OVERWRITE
+      ResolveConflictsOnCreate: OVERWRITE
+      ResolveConflictsOnUpdate: OVERWRITE
       Tags:
         - Key: Project
           Value: !Ref ProjectName
