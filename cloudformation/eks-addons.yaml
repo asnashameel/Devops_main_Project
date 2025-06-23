@@ -38,6 +38,7 @@ Resources:
       Tags:
         - Key: Project
           Value: !Ref ProjectName
+  
   AWSLoadBalancerControllerRole:
     Type: AWS::IAM::Role
     Properties:
@@ -115,12 +116,12 @@ Resources:
                 Resource: '*'
               - Effect: Allow
                 Action:
-                  - ec2:AuthorizeSecurityGroupIngress
-                  - ec2:RevokeSecurityGroupIngress
+                  - ec2:CreateSecurityGroup
                 Resource: '*'
               - Effect: Allow
                 Action:
-                  - ec2:CreateSecurityGroup
+                  - ec2:AuthorizeSecurityGroupIngress
+                  - ec2:RevokeSecurityGroupIngress
                 Resource: '*'
               - Effect: Allow
                 Action:
@@ -131,6 +132,23 @@ Resources:
                     ec2:CreateAction: CreateSecurityGroup
                   Null:
                     aws:RequestedRegion: 'false'
+              - Effect: Allow
+                Action:
+                  - ec2:CreateTags
+                Resource: arn:aws:ec2:*:*:network-interface/*
+                Condition:
+                  StringEquals:
+                    ec2:CreateAction: CreateNetworkInterface
+                  Null:
+                    aws:RequestedRegion: 'false'
+              - Effect: Allow
+                Action:
+                  - ec2:CreateNetworkInterface
+                  - ec2:DeleteNetworkInterface
+                  - ec2:AssignPrivateIpAddresses
+                  - ec2:UnassignPrivateIpAddresses
+                  - ec2:ModifyNetworkInterfaceAttribute
+                Resource: '*'
               - Effect: Allow
                 Action:
                   - elasticloadbalancing:CreateLoadBalancer
@@ -188,6 +206,7 @@ Resources:
       Tags:
         - Key: Project
           Value: !Ref ProjectName
+  
   EBSCSIDriverAddon:
     Type: AWS::EKS::Addon
     Properties:
