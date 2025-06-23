@@ -1,0 +1,79 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: us-east-1
+    AWS_ACCOUNT_ID: "715841362372"
+    REGION: us-east-1
+    FRONTEND_REPO: cloudops-frontend
+    BACKEND_REPO: cloudops-backend
+    FRONTEND_DIR: frontend
+    BACKEND_DIR: backend
+    K8S_MANIFEST_DIR: k8s
+    CLUSTER_NAME: cloudops-demo
+    IMAGE_TAG: latest
+
+phases:
+  install:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - echo Installing kubectl...
+      - curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/kubectl
+      - chmod +x ./kubectl
+      - mv ./kubectl /usr/local/bin/kubectl
+      - kubectl version --short --client
+      - echo "Installing Helm..."
+      - HELM_VERSION="v3.15.0" # You can choose a specific stable Helm 3 version
+      - HELM_TAR="helm-${HELM_VERSION}-linux-amd64.tar.gz"
+      - wget -O /tmp/${HELM_TAR} https://get.helm.sh/${HELM_TAR}
+      - tar -zxvf /tmp/${HELM_TAR} -C /tmp/
+      - mv /tmp/linux-amd64/helm /usr/local/bin/helm
+      - rm -rf /tmp/${HELM_TAR} /tmp/linux-amd64
+      - helm version --short
+  pre_build:
+    commands:
+      - aws sts get-caller-identity
+      - echo Setting dynamic image tag...
+      #- export IMAGE_TAG=v1.${CODEBUILD_BUILD_NUMBER}
+
+      - echo Building the Docker images...
+      - echo Updating kubeconfig for EKS cluster...
+      - aws eks update-kubeconfig --region $REGION --name $CLUSTER_NAME
+  build:
+    commands:
+      - echo Building frontend Docker image...
+      - docker build -t ${FRONTEND_REPO}:${IMAGE_TAG} ${FRONTEND_DIR}
+      - docker tag ${FRONTEND_REPO}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${FRONTEND_REPO}:${IMAGE_TAG}
+
+      - echo Building backend Docker image...
+      - docker build -t ${BACKEND_REPO}:${IMAGE_TAG} ${BACKEND_DIR}
+      - docker tag ${BACKEND_REPO}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${BACKEND_REPO}:${IMAGE_TAG}
+  post_build:
+    commands:
+      - echo Pushing frontend image to ECR...
+      - docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${FRONTEND_REPO}:${IMAGE_TAG}
+
+      - echo Pushing backend image to ECR...
+      - docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${BACKEND_REPO}:${IMAGE_TAG}
+
+      - echo Updating Kubernetes manifests...
+      - mkdir -p k8s-out
+
+      - sed "s|IMAGE_PLACEHOLDER|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${FRONTEND_REPO}:${IMAGE_TAG}|g" $K8S_MANIFEST_DIR/09-frontend-deployment.yaml > k8s-out/09-frontend-deployment.yaml
+      - sed "s|IMAGE_PLACEHOLDER|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${BACKEND_REPO}:${IMAGE_TAG}|g" $K8S_MANIFEST_DIR/07-backend-deployment.yaml > k8s-out/07-backend-deployment.yaml
+
+      - cp $K8S_MANIFEST_DIR/*.yaml k8s-out/
+      - echo "Final list of generated Kubernetes YAML files:"
+      - find k8s-out/
+artifacts:
+  base-directory: k8s-out
+  discard-paths: yes
+  files:
+    - '**/*'
+
+cache:
+  paths:
+    - 'frontend/node_modules/**/*'
+    - 'backend/node_modules/**/*'
