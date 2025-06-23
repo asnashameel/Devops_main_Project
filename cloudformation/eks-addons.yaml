@@ -120,7 +120,7 @@ Resources:
                   StringEquals:
                     ec2:CreateAction: CreateSecurityGroup
                   Null:
-                    aws:RequestedRegion: 'false'
+                    aws:RequestedRegion: "false"
               - Effect: Allow
                 Action:
                   - ec2:CreateTags
@@ -129,7 +129,7 @@ Resources:
                   StringEquals:
                     ec2:CreateAction: CreateNetworkInterface
                   Null:
-                    aws:RequestedRegion: 'false'
+                    aws:RequestedRegion: "false"
               - Effect: Allow
                 Action:
                   - ec2:CreateNetworkInterface
@@ -145,7 +145,7 @@ Resources:
                 Resource: '*'
                 Condition:
                   Null:
-                    aws:RequestedRegion: 'false'
+                    aws:RequestedRegion: "false"
               - Effect: Allow
                 Action:
                   - elasticloadbalancing:CreateListener
@@ -163,8 +163,8 @@ Resources:
                   - arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*
                 Condition:
                   Null:
-                    aws:RequestedRegion: 'false'
-                    aws:ResourceTag/elbv2.k8s.aws/cluster: 'false'
+                    aws:RequestedRegion: "false"
+                    aws:ResourceTag/elbv2.k8s.aws/cluster: "false"
               - Effect: Allow
                 Action:
                   - elasticloadbalancing:ModifyLoadBalancerAttributes
@@ -178,7 +178,7 @@ Resources:
                 Resource: '*'
                 Condition:
                   Null:
-                    aws:ResourceTag/elbv2.k8s.aws/cluster: 'false'
+                    aws:ResourceTag/elbv2.k8s.aws/cluster: "false"
               - Effect: Allow
                 Action:
                   - elasticloadbalancing:RegisterTargets
