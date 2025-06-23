@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    AWS_DEFAULT_REGION: us-west-2
+    AWS_DEFAULT_REGION: us-east-1
     AWS_ACCOUNT_ID: "715841362372"
     REGION: us-east-1
     FRONTEND_REPO: cloudops-frontend
