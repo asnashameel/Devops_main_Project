@@ -9,7 +9,7 @@ env:
     BACKEND_REPO: cloudops-backend
     FRONTEND_DIR: frontend
     BACKEND_DIR: backend
-    K8S_MANIFEST_DIR: k8s
+    K8S_MANIFEST_DIR: k8sterra
     CLUSTER_NAME: cloudops-demo
     IMAGE_TAG: latest
 
