@@ -90,9 +90,3 @@ docker-compose up --build
 - Kubernetes probes
 - Service metrics
 
-## Security
-
-- Non-root containers
-- Network policies
-- Secret management
-- RBAC configuration
