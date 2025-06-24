@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cwagentconfig
+  namespace: amazon-cloudwatch
+  labels:
+    app: cloudwatch-agent
+data:
+  cwagentconfig.json: |
+    {
+      "agent": {
+        "region": "us-west-2"
+      },
+      "logs": {
+        "logs_collected": {
+          "files": {
+            "collect_list": [
+              {
+                "file_path": "/var/log/containers/*.log",
+                "log_group_name": "/aws/eks/cloudops-demo/application-logs",
+                "log_stream_name": "{hostname}",
+                "timezone": "UTC"
+              }
+            ]
+          }
+        },
+        "metrics_collected": {
+          "kubernetes": {
+            "cluster_name": "eks-cluster-2",
+            "metrics_collection_interval": 60
+          }
+        },
+        "force_flush_interval": 5
+      }
+    }

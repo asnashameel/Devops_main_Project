@@ -1,0 +1,17 @@
+apiVersion: cloudwatch.aws.amazon.com/v1alpha1
+kind: CloudWatchAgentConfig
+metadata:
+  name: cloudops-logging
+  namespace: amazon-cloudwatch
+spec:
+  agent:
+    region: us-west-2
+  logs:
+    logs_collected:
+      files:
+        collect_list:
+          - file_path: /var/log/containers/*.log
+            log_group_name: /aws/eks/cloudops-demo/application-logs
+            log_stream_name: '{hostname}'
+            timezone: UTC
+    force_flush_interval: 5
