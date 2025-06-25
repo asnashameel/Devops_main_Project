@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: 715841362372.dkr.ecr.us-west-2.amazonaws.com/cloudops-frontend:latest  # Replace with your image
+        image: 365591124323.dkr.ecr.us-west-2.amazonaws.com/cloudops-frontend:latest  # Replace with your image
         ports:
         - containerPort: 80
         env:
