@@ -8,4 +8,4 @@ Parameters:
   NodeGroupDesiredSize: "3"
   DBName: "cloudops_demo"
   DBUsername: "postgres"
-  DBPassword: "CHANGE_ME_TO_SECURE_PASSWORD"
+  DBPassword: "asnashameel12"
