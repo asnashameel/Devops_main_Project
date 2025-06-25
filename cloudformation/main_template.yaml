@@ -592,7 +592,7 @@ Resources:
       DBInstanceIdentifier: !Sub '${ProjectName}-postgres'
       DBInstanceClass: db.t3.micro
       Engine: postgres
-      EngineVersion: '15.4'
+      EngineVersion: '15.13'
       AllocatedStorage: 20
       MaxAllocatedStorage: 100
       StorageType: gp2
