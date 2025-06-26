@@ -12,7 +12,7 @@ metadata:
     alb.ingress.kubernetes.io/tags: Environment=demo,Project=cloudops
 spec:
   rules:
-  - host: a6bb5671a27984aa3901f093d47680d2-5bbd7d19e96f7411.elb.us-east-1.amazonaws.com  # Replace with your domain
+  - host: a607d951f22d34186904e5321ba31689-b034132808119aed.elb.us-east-1.amazonaws.com  # Replace with your domain
     http:
       paths:
       - path: /

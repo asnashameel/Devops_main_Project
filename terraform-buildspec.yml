@@ -61,7 +61,7 @@ phases:
         # Attempts to delete the addon. '|| echo' prevents the script from failing
         # if the addon doesn't exist, which is expected for a clean state.
         aws eks delete-addon --cluster-name cloudops-demo --addon-name aws-ebs-csi-driver --region ${AWS_DEFAULT_REGION} || echo "EKS addon 'aws-ebs-csi-driver' not found or already deleted."
-      
+ 
         echo "Waiting 30 seconds for addon deletion to propagate..."
         sleep 30 # Give AWS time to process the deletion before proceeding.
       
